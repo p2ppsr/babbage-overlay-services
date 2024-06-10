@@ -10,6 +10,7 @@ import knexfile from '../knexfile.js'
 import { HelloWorldTopicManager } from './helloworld-services/HelloWorldTopicManager.js'
 import { HelloWorldLookupService } from './helloworld-services/HelloWorldLookupService.js'
 import { HelloWorldStorage } from './helloworld-services/HelloWorldStorage.js'
+import { spawn } from 'child_process'
 
 const knex = Knex(knexfile.development)
 const app = express()
@@ -296,6 +297,9 @@ initialization()
     console.log(PORT)
     app.listen(PORT, () => {
       console.log(`BSV Overlay Services Engine is listening on port ${PORT as string}`)
+      if (NODE_ENV !== 'development') {
+        spawn('nginx', [], { stdio: [process.stdin, process.stdout, process.stderr] })
+      }
     })
   })
   .catch((error) => {
