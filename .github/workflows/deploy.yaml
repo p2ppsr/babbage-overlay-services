@@ -4,13 +4,11 @@ on:
     branches:
       - master
       - production
-
 env:
   CURRENT_BRANCH: ${{ github.ref_name =='production' && 'production' || 'master' }}
   GCR_HOST: us.gcr.io
   GOOGLE_PROJECT_ID: babbage-private
   GCR_IMAGE_NAME: overlay-services
-
 jobs:
   build:
     name: Deploy
@@ -40,7 +38,7 @@ jobs:
           MIGRATE_KEY: ${{             env.CURRENT_BRANCH =='production' && secrets.PROD_MIGRATE_KEY || secrets.STAGING_MIGRATE_KEY }}
           SERVER_PRIVATE_KEY: ${{      env.CURRENT_BRANCH =='production' && secrets.PROD_SERVER_PRIVATE_KEY || secrets.STAGING_SERVER_PRIVATE_KEY }}
           DB_CONNECTION: ${{    env.CURRENT_BRANCH =='production' && secrets.PROD_DB_CONNECTION || secrets.STAGING_DB_CONNECTION }}
-          DB_NAME:  ${{    env.CURRENT_BRANCH =='production' && secrets.PROD_DB_NAME || secrets.STAGING_DB_NAME }}
+          DB_NAME: ${{    env.CURRENT_BRANCH =='production' && secrets.PROD_DB_NAME || secrets.STAGING_DB_NAME }}
           TAAL_API_KEY: ${{    env.CURRENT_BRANCH =='production' && secrets.PROD_TAAL_API_KEY || secrets.STAGING_TAAL_API_KEY }}
       - uses: google-github-actions/auth@v1
         with:
