@@ -276,7 +276,8 @@ app.post('/migrate', (req, res) => {
         description: 'Access with this key was denied.'
       })
     }
-  })().catch(() => {
+  })().catch((error) => {
+    console.error('ERR', error)
     res.status(500).json({
       status: 'error',
       message: 'Unexpected error'
