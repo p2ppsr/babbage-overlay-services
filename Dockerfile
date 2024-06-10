@@ -12,6 +12,7 @@ EXPOSE 8080
 WORKDIR /app
 COPY . .
 # Install dependencies including TypeScript and Knex globally
-RUN npm install -g typescript knex && \
+RUN npm install && \
+    npm install -g typescript knex && \
     npm run build
 CMD [ "sh", "scripts/start.sh"]
