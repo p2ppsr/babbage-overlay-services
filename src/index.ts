@@ -24,6 +24,7 @@ const {
   DB_NAME,
   NODE_ENV,
   HOSTING_DOMAIN,
+  MIGRATE_KEY,
   TAAL_API_KEY
 } = process.env
 
@@ -242,6 +243,33 @@ app.post('/arc-ingest', (req, res) => {
         status: 'error'
         // code: error.code,
         // description: error.message
+      })
+    }
+  })().catch(() => {
+    res.status(500).json({
+      status: 'error',
+      message: 'Unexpected error'
+    })
+  })
+})
+
+app.post('/migrate', (req, res) => {
+  (async () => {
+    if (
+      typeof MIGRATE_KEY === 'string' &&
+      MIGRATE_KEY.length > 10 &&
+      req.body.migratekey === MIGRATE_KEY
+    ) {
+      const result = await knex.migrate.latest()
+      res.status(200).json({
+        status: 'success',
+        result
+      })
+    } else {
+      res.status(401).json({
+        status: 'error',
+        code: 'ERR_UNAUTHORIZED',
+        description: 'Access with this key was denied.'
       })
     }
   })().catch(() => {
