@@ -10,7 +10,7 @@ COPY ./nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 8080
 WORKDIR /app
-RUN npm i knex -g
-RUN npm i sqlite3 --save
 COPY . .
+RUN npm i knex -g && \
+    npm run build
 CMD [ "sh", "scripts/start.sh"]
