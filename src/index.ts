@@ -28,6 +28,9 @@ const {
   MIGRATE_KEY,
   TAAL_API_KEY
 } = process.env
+const HTTP_PORT = NODE_ENV !== 'development'
+  ? 3000
+  : (PORT !== undefined ? PORT : (PORT !== undefined ? PORT : 8080))
 
 // Initialization the overlay engine
 let engine: Engine
@@ -294,9 +297,8 @@ app.use((req, res) => {
 // Start your Engines!
 initialization()
   .then(() => {
-    console.log(PORT)
-    app.listen(PORT, () => {
-      console.log(`BSV Overlay Services Engine is listening on port ${PORT as string}`)
+    app.listen(HTTP_PORT, () => {
+      console.log(`BSV Overlay Services Engine is listening on port ${HTTP_PORT}`)
       if (NODE_ENV !== 'development') {
         spawn('nginx', [], { stdio: [process.stdin, process.stdout, process.stderr] })
       }
