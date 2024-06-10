@@ -9,7 +9,7 @@ const config: Knex.Config = {
     : undefined,
   useNullAsDefault: true,
   migrations: {
-    directory: './src/migrations'
+    directory: './dist/src/migrations'
   },
   pool: {
     min: 0,
