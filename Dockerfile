@@ -11,6 +11,7 @@ COPY ./nginx.conf /etc/nginx/nginx.conf
 EXPOSE 8080
 WORKDIR /app
 COPY . .
-RUN npm i knex -g && \
+# Install dependencies including TypeScript and Knex globally
+RUN npm install -g typescript knex && \
     npm run build
 CMD [ "sh", "scripts/start.sh"]
