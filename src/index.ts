@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'
 import express from 'express'
 import bodyparser from 'body-parser'
-import { Engine, KnexStorage } from '@bsv/overlay'
+import { Engine, KnexStorage, TaggedBEEF } from '@bsv/overlay'
 import { WhatsOnChain, NodejsHttpClient, ARC, ArcConfig, MerklePath } from '@bsv/sdk'
 import { MongoClient } from 'mongodb'
 import https from 'https'
@@ -10,6 +10,14 @@ import knexfile from '../knexfile.js'
 import { HelloWorldTopicManager } from './helloworld-services/HelloWorldTopicManager.js'
 import { HelloWorldLookupService } from './helloworld-services/HelloWorldLookupService.js'
 import { HelloWorldStorage } from './helloworld-services/HelloWorldStorage.js'
+import { SHIPLookupService } from './peer-discovery-services/SHIP/SHIPLookupService.js'
+import { SLAPLookupService } from './peer-discovery-services/SLAP/SLAPLookupService.js'
+import { SHIPStorage } from './peer-discovery-services/SHIP/SHIPStorage.js'
+import { SLAPStorage } from './peer-discovery-services/SLAP/SLAPStorage.js'
+import { NinjaAdvertiser } from './peer-discovery-services/NinjaAdvertiser.js'
+import { Advertiser } from '@bsv/overlay/Advertiser.ts'
+import { SHIPTopicManager } from './peer-discovery-services/SHIP/SHIPTopicManager.js'
+import { SLAPTopicManager } from './peer-discovery-services/SLAP/SLAPTopicManager.js'
 import { spawn } from 'child_process'
 
 const knex = Knex(knexfile.development)
@@ -26,7 +34,9 @@ const {
   NODE_ENV,
   HOSTING_DOMAIN,
   MIGRATE_KEY,
-  TAAL_API_KEY
+  TAAL_API_KEY,
+  SERVER_PRIVATE_KEY,
+  DOJO_URL
 } = process.env
 const HTTP_PORT = NODE_ENV !== 'development'
   ? 3000
@@ -34,6 +44,7 @@ const HTTP_PORT = NODE_ENV !== 'development'
 
 // Initialization the overlay engine
 let engine: Engine
+let ninjaAdvertiser: Advertiser
 const initialization = async () => {
   console.log('Starting initialization...')
   try {
@@ -56,14 +67,27 @@ const initialization = async () => {
         httpClient: new NodejsHttpClient(https)
       }
 
+      // Create storage instances
+      const helloStorage = new HelloWorldStorage(mongoClient.db(DB_NAME as string))
+      const shipStorage = new SHIPStorage(mongoClient.db(DB_NAME as string))
+      const slapStorage = new SLAPStorage(mongoClient.db(DB_NAME as string))
+
+      ninjaAdvertiser = new NinjaAdvertiser(
+        SERVER_PRIVATE_KEY as string,
+        DOJO_URL as string,
+        HOSTING_DOMAIN as string
+      )
+
       engine = new Engine(
         {
-          tm_helloworld: new HelloWorldTopicManager()
+          tm_helloworld: new HelloWorldTopicManager(),
+          tm_ship: new SHIPTopicManager(),
+          tm_slap: new SLAPTopicManager()
         },
         {
-          ls_helloworld: new HelloWorldLookupService(
-            new HelloWorldStorage(mongoClient.db(DB_NAME as string))
-          )
+          ls_helloworld: new HelloWorldLookupService(helloStorage),
+          ls_ship: new SHIPLookupService(shipStorage),
+          ls_slap: new SLAPLookupService(slapStorage)
         },
         new KnexStorage(knex),
         new WhatsOnChain(
@@ -71,8 +95,13 @@ const initialization = async () => {
           {
             httpClient: new NodejsHttpClient(https)
           }),
-        new ARC('https://arc.taal.com', arcConfig)
+        HOSTING_DOMAIN as string,
+        new ARC('https://arc.taal.com', arcConfig),
+        ninjaAdvertiser
       )
+
+      // Make sure we have advertisements for all the topics / lookup services we support.
+      await engine.syncAdvertisements()
       console.log('Engine initialized successfully')
     } catch (engineError) {
       console.error('Error during Engine initialization:', engineError)
@@ -109,8 +138,8 @@ app.get('/listTopicManagers', (req, res) => {
       return res.status(200).json(result)
     } catch (error) {
       return res.status(400).json({
-        status: 'error'
-        // description: error.message
+        status: 'error',
+        message: error instanceof Error ? error.message : 'An unknown error occurred'
       })
     }
   })().catch(() => {
@@ -129,9 +158,8 @@ app.get('/listLookupServiceProviders', (req, res) => {
       return res.status(200).json(result)
     } catch (error) {
       return res.status(400).json({
-        status: 'error'
-        // code: error.code,
-        // description: error.message
+        status: 'error',
+        message: error instanceof Error ? error.message : 'An unknown error occurred'
       })
     }
   })().catch(() => {
@@ -150,9 +178,8 @@ app.get('/getDocumentationForTopicManager', (req, res) => {
       return res.status(200).json(result)
     } catch (error) {
       return res.status(400).json({
-        status: 'error'
-        // code: error.code,
-        // description: error.message
+        status: 'error',
+        message: error instanceof Error ? error.message : 'An unknown error occurred'
       })
     }
   })().catch(() => {
@@ -170,9 +197,8 @@ app.get('/getDocumentationForLookupServiceProvider', (req, res) => {
       return res.status(200).json(result)
     } catch (error) {
       return res.status(400).json({
-        status: 'error'
-        // code: error.code,
-        // description: error.message
+        status: 'error',
+        message: error instanceof Error ? error.message : 'An unknown error occurred'
       })
     }
   })().catch(() => {
@@ -189,19 +215,19 @@ app.post('/submit', (req, res) => {
     try {
       // Parse out the topics and construct the tagged BEEF
       const topics = JSON.parse(req.headers['x-topics'] as string)
-      const taggedBEEF = {
+      const taggedBEEF: TaggedBEEF = {
         beef: Array.from(req.body as number[]),
         topics
       }
 
-      const result = await engine.submit(taggedBEEF)
-      return res.status(200).json(result)
+      const steak = await engine.submit(taggedBEEF)
+
+      return res.status(200).json(steak)
     } catch (error) {
       console.error(error)
       return res.status(400).json({
-        status: 'error'
-        // code: error.code,
-        // description: error.message
+        status: 'error',
+        message: error instanceof Error ? error.message : 'An unknown error occurred'
       })
     }
   })().catch(() => {
@@ -220,9 +246,8 @@ app.post('/lookup', (req, res) => {
     } catch (error) {
       console.error(error)
       return res.status(400).json({
-        status: 'error'
-        // code: error.code,
-        // description: error.message
+        status: 'error',
+        message: error instanceof Error ? error.message : 'An unknown error occurred'
       })
     }
   })().catch(() => {
@@ -244,9 +269,8 @@ app.post('/arc-ingest', (req, res) => {
     } catch (error) {
       console.error(error)
       return res.status(400).json({
-        status: 'error'
-        // code: error.code,
-        // description: error.message
+        status: 'error',
+        message: error instanceof Error ? error.message : 'An unknown error occurred'
       })
     }
   })().catch(() => {
