@@ -40,6 +40,7 @@ jobs:
           DB_CONNECTION: ${{    env.CURRENT_BRANCH =='production' && secrets.PROD_DB_CONNECTION || secrets.STAGING_DB_CONNECTION }}
           DB_NAME: ${{    env.CURRENT_BRANCH =='production' && secrets.PROD_DB_NAME || secrets.STAGING_DB_NAME }}
           TAAL_API_KEY: ${{    env.CURRENT_BRANCH =='production' && secrets.PROD_TAAL_API_KEY || secrets.STAGING_TAAL_API_KEY }}
+          DOJO_URL: ${{                env.CURRENT_BRANCH =='production' && secrets.PROD_DOJO_URL || secrets.STAGING_DOJO_URL }}
       - uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.gcp_deploy_creds }}
