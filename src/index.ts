@@ -99,9 +99,6 @@ const initialization = async () => {
         new ARC('https://arc.taal.com', arcConfig),
         ninjaAdvertiser
       )
-
-      // Make sure we have advertisements for all the topics / lookup services we support.
-      await engine.syncAdvertisements()
       console.log('Engine initialized successfully')
     } catch (engineError) {
       console.error('Error during Engine initialization:', engineError)
@@ -327,6 +324,13 @@ initialization()
       if (NODE_ENV !== 'development') {
         spawn('nginx', [], { stdio: [process.stdin, process.stdout, process.stderr] })
       }
+      (async () => {
+        // Make sure we have advertisements for all the topics / lookup services we support.
+        await engine.syncAdvertisements()
+      })().catch((error) => {
+        console.error('Failed to sync advertisements:', error)
+        process.exit(1)
+      })
     })
   })
   .catch((error) => {
