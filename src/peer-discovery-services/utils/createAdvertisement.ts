@@ -1,4 +1,4 @@
-import { getPaymentAddress } from 'sendover'
+import { getPaymentPrivateKey } from 'sendover'
 import pushdrop from 'pushdrop'
 import { Ninja } from 'ninja-base'
 import { TaggedBEEF } from '@bsv/overlay'
@@ -13,38 +13,37 @@ import { PrivateKey, PublicKey } from '@bsv/sdk'
 export async function createAdvertisement(
   privateKey: string,
   protocol: 'SHIP' | 'SLAP',
-  domainName: string,
+  domain: string,
   topicOrServiceName: string,
   ninja: Ninja,
   note: string
 ): Promise<TaggedBEEF> {
+  const identityKey = PublicKey.fromPrivateKey(new PrivateKey(privateKey, 'hex')).toString()
+
+  // Derive a locking private key using BRC-42 derivation scheme
+  const derivedPrivateKey = getPaymentPrivateKey({
+    recipientPrivateKey: privateKey,
+    senderPublicKey: identityKey,
+    invoiceNumber: `2-${protocol}-1`,
+    returnType: 'hex'
+  })
+
   const lockingScript = await pushdrop.create({
     fields: [
       Buffer.from(protocol), // SHIP | SLAP
-      Buffer.from(PublicKey.fromPrivateKey(new PrivateKey(privateKey, 'hex')).toString(), 'hex'),
-      Buffer.from(domainName),
+      Buffer.from(identityKey, 'hex'),
+      Buffer.from(domain),
       Buffer.from(topicOrServiceName)
     ],
-    key: privateKey
+    key: derivedPrivateKey
   })
-
-  const expectedPublicKey = getPaymentAddress({
-    senderPrivateKey: '0000000000000000000000000000000000000000000000000000000000000001',
-    recipientPublicKey: privateKey,
-    invoiceNumber: `2-${protocol}-1`,
-    returnType: 'publicKey'
-  })
-
-  if (lockingScript.toString('hex') !== expectedPublicKey) {
-    throw new Error('Invalid locking key!')
-  }
 
   // Put in a basket if we want to track it.
   const tx = await ninja.getTransactionWithOutputs({
     outputs: [{
       satoshis: 1,
       script: lockingScript,
-      basket: `tm_${protocol}` // Put it in a basket for easy lookup
+      basket: protocol === 'SHIP' ? 'tm_ship' : 'tm_slap'
     }],
     note,
     autoProcess: true
@@ -52,11 +51,12 @@ export async function createAdvertisement(
 
   const beef = toBEEFfromEnvelope({
     rawTx: tx.rawTx as string,
-    inputs: tx.inputs
+    inputs: tx.inputs,
+    txid: tx.txid
   }).beef
 
   return {
     beef,
-    topics: [`tm_${protocol}`] // tm_ship | tm_slap
+    topics: [protocol === 'SHIP' ? 'tm_ship' : 'tm_slap']
   }
 }
