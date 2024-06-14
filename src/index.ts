@@ -326,10 +326,13 @@ initialization()
       }
       (async () => {
         // Make sure we have advertisements for all the topics / lookup services we support.
-        await engine.syncAdvertisements()
+        try {
+          await engine.syncAdvertisements()
+        } catch (error) {
+          console.error('Failed to sync advertisements:', error)
+        }
       })().catch((error) => {
-        console.error('Failed to sync advertisements:', error)
-        process.exit(1)
+        console.error('Unexpected error occurred:', error)
       })
     })
   })
