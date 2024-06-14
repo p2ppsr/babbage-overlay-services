@@ -68,7 +68,7 @@ const initialization = async () => {
       }
 
       // Create storage instances
-      const helloStorage = new HelloWorldStorage(mongoClient.db(`${NODE_ENV as string}_helloworld_lookupService`))
+      // const helloStorage = new HelloWorldStorage(mongoClient.db(`${NODE_ENV as string}_helloworld_lookupService`))
       const shipStorage = new SHIPStorage(mongoClient.db(`${NODE_ENV as string}_ship_lookupService`))
       const slapStorage = new SLAPStorage(mongoClient.db(`${NODE_ENV as string}_slap_lookupService`))
 
@@ -80,12 +80,12 @@ const initialization = async () => {
 
       engine = new Engine(
         {
-          tm_helloworld: new HelloWorldTopicManager(),
+          // tm_helloworld: new HelloWorldTopicManager(),
           tm_ship: new SHIPTopicManager(),
           tm_slap: new SLAPTopicManager()
         },
         {
-          ls_helloworld: new HelloWorldLookupService(helloStorage),
+          // ls_helloworld: new HelloWorldLookupService(helloStorage),
           ls_ship: new SHIPLookupService(shipStorage),
           ls_slap: new SLAPLookupService(slapStorage)
         },
