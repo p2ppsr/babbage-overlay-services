@@ -42,6 +42,9 @@ const HTTP_PORT = NODE_ENV !== 'development'
   ? 3000
   : (PORT !== undefined ? PORT : (PORT !== undefined ? PORT : 8080))
 
+const SLAP_TRACKERS = ['https://overlay.babbage.systems']
+const SHIP_TRACKERS = ['https://overlay.babbage.systems']
+
 // Initialization the overlay engine
 let engine: Engine
 let ninjaAdvertiser: Advertiser
@@ -96,8 +99,8 @@ const initialization = async () => {
             httpClient: new NodejsHttpClient(https)
           }),
         HOSTING_DOMAIN as string,
-        ['https://overlay.babbage.systems'],
-        ['https://overlay.babbage.systems'],
+        SHIP_TRACKERS,
+        SLAP_TRACKERS,
         new ARC('https://arc.taal.com', arcConfig),
         ninjaAdvertiser
       )
