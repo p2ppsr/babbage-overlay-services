@@ -19,16 +19,18 @@ export const verifyToken = (
   signature: string,
   protocolId: string
 ): void => {
-  const expectedPublicKey = getPaymentAddress({
-    senderPrivateKey: process.env.SERVER_PRIVATE_KEY,
-    recipientPublicKey: identityKey,
-    invoiceNumber: `2-${protocolId}-1`, // BRC-43 formatted invoice number
-    returnType: 'publicKey'
-  })
+  // In the context of receiving external SHIP and SLAP tokens, we can't verify the expectedPublicKey!
 
-  if (expectedPublicKey !== lockingPublicKey) {
-    throw new Error('Invalid locking key!')
-  }
+  // const expectedPublicKey = getPaymentAddress({
+  //   senderPrivateKey: process.env.SERVER_PRIVATE_KEY,
+  //   recipientPublicKey: identityKey,
+  //   invoiceNumber: `2-${protocolId}-1`, // BRC-43 formatted invoice number
+  //   returnType: 'publicKey'
+  // })
+
+  // if (expectedPublicKey !== lockingPublicKey) {
+  //   throw new Error('Invalid locking key!')
+  // }
 
   const pubKey = PublicKey.fromString(lockingPublicKey)
   const hasValidSignature = pubKey.verify(
