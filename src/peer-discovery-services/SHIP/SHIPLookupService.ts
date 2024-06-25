@@ -3,12 +3,7 @@ import { SHIPStorage } from './SHIPStorage.js'
 import { Script } from '@bsv/sdk'
 import pushdrop from 'pushdrop'
 import { SHIPQuery } from 'src/types.js'
-import { promises as fs } from 'fs'
-import { dirname, join } from 'path'
-import { fileURLToPath } from 'url'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+import { getDocumentation } from '../../utils/getDocumentation.js'
 
 /**
  * Implements the SHIP lookup service
@@ -101,14 +96,7 @@ export class SHIPLookupService implements LookupService {
    * @returns A promise that resolves to the documentation string
    */
   async getDocumentation(): Promise<string> {
-    const filePath = join(__dirname, '../../../../docs/ship-lookup-service/ship.md')
-    try {
-      const data = await fs.readFile(filePath, 'utf-8')
-      return data
-    } catch (error) {
-      console.error('Error reading documentation file:', error)
-      throw new Error('Failed to read documentation file')
-    }
+    return await getDocumentation('../../docs/SHIP/ship-lookup-service.md')
   }
 
   /**

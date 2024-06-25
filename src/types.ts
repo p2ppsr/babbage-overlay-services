@@ -5,6 +5,14 @@ export interface HelloWorldRecord {
   createdAt: Date
 }
 
+export interface UHRPRecord {
+  txid: string
+  outputIndex: number
+  uhrpURL: string
+  retentionPeriod: number
+  createdAt: Date
+}
+
 export interface UTXOReference {
   txid: string
   outputIndex: number
@@ -36,4 +44,24 @@ export interface SHIPQuery {
 export interface SLAPQuery {
   domain?: string
   service?: string
+}
+
+export interface TokenQuery {
+  txid?: string
+  outputIndex?: number
+  findAll?: boolean
+}
+
+export interface TokenRecord {
+  txid: string
+  outputIndex: number
+  amount: number
+  ownerKey: string
+  assetId: string
+  createdAt: Date
+}
+
+export interface UHRPQuery {
+  UHRPUrl?: string
+  retentionPeriod?: number
 }
