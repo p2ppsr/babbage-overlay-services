@@ -49,7 +49,7 @@ const HTTP_PORT = NODE_ENV !== 'development'
 const SLAP_TRACKERS = [`https://${NODE_ENV === 'production' ? '' : 'staging-'}overlay.babbage.systems`]
 const SHIP_TRACKERS = [`https://${NODE_ENV === 'production' ? '' : 'staging-'}overlay.babbage.systems`]
 const SYNC_CONFIGURATION: SyncConfiguration = {
-  tm_helloworld: ['http://localhost:8080']
+  tm_helloworld: []
 }
 
 // Initialization the overlay engine
