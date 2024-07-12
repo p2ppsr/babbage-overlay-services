@@ -54,7 +54,7 @@ const SYNC_CONFIGURATION: SyncConfiguration = {
 
 // Initialization the overlay engine
 let engine: Engine
-let ninjaAdvertiser: Advertiser
+let ninjaAdvertiser: NinjaAdvertiser
 const initialization = async () => {
   console.log('Starting initialization...')
   try {
@@ -115,6 +115,7 @@ const initialization = async () => {
         ninjaAdvertiser,
         SYNC_CONFIGURATION
       )
+      ninjaAdvertiser.setLookupEngine(engine)
       console.log('Engine initialized successfully')
     } catch (engineError) {
       console.error('Error during Engine initialization:', engineError)
@@ -277,11 +278,9 @@ app.post('/lookup', (req, res) => {
 app.post('/arc-ingest', (req, res) => {
   (async () => {
     try {
-      console.log('txid', req.body.txid)
-      console.log('merklePath', req.body.merklePath)
       const merklePath = MerklePath.fromHex(req.body.merklePath)
-      await engine.handleNewMerkleProof(req.body.txid, merklePath)
-      return res.status(200)
+      await engine.handleNewMerkleProof(req.body.txid, merklePath, req.body.blockHeight)
+      return res.status(200).json({ status: 'success', message: 'transaction status updated' })
     } catch (error) {
       console.error(error)
       return res.status(400).json({
