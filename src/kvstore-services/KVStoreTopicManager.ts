@@ -77,5 +77,3 @@ export class KVStoreTopicManager implements TopicManager {
     throw new Error('Method not implemented.')
   }
 }
-
-export default KVStoreTopicManager
