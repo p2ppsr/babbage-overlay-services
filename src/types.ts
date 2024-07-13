@@ -65,3 +65,11 @@ export interface UHRPQuery {
   UHRPUrl?: string
   retentionPeriod?: number
 }
+
+export interface KVStoreRecord {
+  txid: string
+  outputIndex: number
+  protectedKey: string
+  value: string
+  createdAt: Date
+}

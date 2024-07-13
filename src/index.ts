@@ -22,6 +22,9 @@ import { UHRPStorage } from './data-integrity-services/UHRPStorage.js'
 import { UHRPTopicManager } from './data-integrity-services/UHRPTopicManager.js'
 import { UHRPLookupService } from './data-integrity-services/UHRPLookupService.js'
 import { SyncConfiguration } from '@bsv/overlay/SyncConfiguration.ts'
+import { KVStoreStorage } from './kvstore-services/KnexStorageEngine.js'
+import KVStoreTopicManager from './kvstore-services/KVStoreTopicManager.js'
+import { KVStoreLookupService } from './kvstore-services/KVStoreLookupService.js'
 
 const knex = Knex(knexfile.development)
 const app = express()
@@ -81,6 +84,7 @@ const initialization = async () => {
       const uhrpStorage = new UHRPStorage(mongoClient.db(`${NODE_ENV as string}_uhrp_lookupService`))
       const shipStorage = new SHIPStorage(mongoClient.db(`${NODE_ENV as string}_ship_lookupService`))
       const slapStorage = new SLAPStorage(mongoClient.db(`${NODE_ENV as string}_slap_lookupService`))
+      const kvstoreStorage = new KVStoreStorage(mongoClient.db(`${NODE_ENV as string}_kvstore_lookupService`))
 
       ninjaAdvertiser = new NinjaAdvertiser(
         SERVER_PRIVATE_KEY as string,
@@ -93,13 +97,15 @@ const initialization = async () => {
           tm_helloworld: new HelloWorldTopicManager(),
           tm_uhrp: new UHRPTopicManager(),
           tm_ship: new SHIPTopicManager(),
-          tm_slap: new SLAPTopicManager()
+          tm_slap: new SLAPTopicManager(),
+          tm_kvstore: new KVStoreTopicManager()
         },
         {
           ls_helloworld: new HelloWorldLookupService(helloStorage),
           ls_uhrp: new UHRPLookupService(uhrpStorage),
           ls_ship: new SHIPLookupService(shipStorage),
-          ls_slap: new SLAPLookupService(slapStorage)
+          ls_slap: new SLAPLookupService(slapStorage),
+          ls_kvstore: new KVStoreLookupService(kvstoreStorage)
         },
         new KnexStorage(knex),
         new WhatsOnChain(
