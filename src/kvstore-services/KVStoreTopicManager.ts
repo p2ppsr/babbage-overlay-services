@@ -1,7 +1,7 @@
 import { AdmittanceInstructions, TopicManager } from '@bsv/overlay'
 import { Transaction } from '@bsv/sdk'
-import { decode } from 'pushdrop'
-import { getDocumentation } from 'src/utils/getDocumentation.js'
+import pushdrop from 'pushdrop'
+import { getDocumentation } from '../utils/getDocumentation.js'
 
 export class KVStoreTopicManager implements TopicManager {
   /**
@@ -17,7 +17,7 @@ export class KVStoreTopicManager implements TopicManager {
 
       for (const [i, output] of parsedTransaction.outputs.entries()) {
         try {
-          const result = decode({
+          const result = pushdrop.decode({
             script: output.lockingScript.toHex(),
             fieldFormat: 'buffer'
           })

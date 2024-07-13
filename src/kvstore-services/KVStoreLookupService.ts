@@ -2,7 +2,7 @@ import { LookupService, LookupQuestion, LookupAnswer, LookupFormula } from '@bsv
 import { Script } from '@bsv/sdk'
 import pushdrop from 'pushdrop'
 import { KVStoreStorage } from './KnexStorageEngine.js'
-import { getDocumentation } from 'src/utils/getDocumentation.js'
+import { getDocumentation } from '../utils/getDocumentation.js'
 
 /**
  * KVStoreLookupService implements a lookup service for KVStore protocol
