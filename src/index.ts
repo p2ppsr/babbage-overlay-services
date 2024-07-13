@@ -23,7 +23,7 @@ import { UHRPTopicManager } from './data-integrity-services/UHRPTopicManager.js'
 import { UHRPLookupService } from './data-integrity-services/UHRPLookupService.js'
 import { SyncConfiguration } from '@bsv/overlay/SyncConfiguration.ts'
 import { KVStoreStorage } from './kvstore-services/KnexStorageEngine.js'
-import KVStoreTopicManager from './kvstore-services/KVStoreTopicManager.js'
+import { KVStoreTopicManager } from './kvstore-services/KVStoreTopicManager.js'
 import { KVStoreLookupService } from './kvstore-services/KVStoreLookupService.js'
 
 const knex = Knex(knexfile.development)
