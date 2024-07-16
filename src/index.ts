@@ -48,10 +48,11 @@ const HTTP_PORT = NODE_ENV !== 'development'
   : (PORT !== undefined ? PORT : (PORT !== undefined ? PORT : 8080))
 
 // Configure with custom URLs specific to your supported topics.
-const SLAP_TRACKERS = [`https://${NODE_ENV === 'production' ? '' : 'staging-'}overlay.babbage.systems`]
-const SHIP_TRACKERS = [`https://${NODE_ENV === 'production' ? '' : 'staging-'}overlay.babbage.systems`]
+const overlayExampleURL = `https://${NODE_ENV === 'production' ? '' : 'staging-'}overlay-example.babbage.systems`
+const SLAP_TRACKERS = [overlayExampleURL]
+const SHIP_TRACKERS = [overlayExampleURL]
 const SYNC_CONFIGURATION: SyncConfiguration = {
-  tm_helloworld: []
+  tm_helloworld: [overlayExampleURL]
 }
 
 // Initialization the overlay engine
