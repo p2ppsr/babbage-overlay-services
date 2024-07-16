@@ -48,10 +48,11 @@ const HTTP_PORT = NODE_ENV !== 'development'
   : (PORT !== undefined ? PORT : (PORT !== undefined ? PORT : 8080))
 
 // Configure with custom URLs specific to your supported topics.
-const SLAP_TRACKERS = [`https://${NODE_ENV === 'production' ? '' : 'staging-'}overlay.babbage.systems`]
-const SHIP_TRACKERS = [`https://${NODE_ENV === 'production' ? '' : 'staging-'}overlay.babbage.systems`]
+const knownDeployedOSN = `https://${NODE_ENV === 'production' ? '' : 'staging-'}overlay.babbage.systems`
+const SLAP_TRACKERS = [knownDeployedOSN]
+const SHIP_TRACKERS = [knownDeployedOSN]
 const SYNC_CONFIGURATION: SyncConfiguration = {
-  tm_helloworld: []
+  tm_helloworld: [knownDeployedOSN]
 }
 
 // Initialization the overlay engine
@@ -62,6 +63,7 @@ const initialization = async () => {
   try {
     const mongoClient = new MongoClient(DB_CONNECTION as string)
     await mongoClient.connect()
+    const db = mongoClient.db(`${NODE_ENV as string}_overlay_lookup_services`)
 
     // Create a new overlay Engine configured with:
     // - a topic manager
@@ -80,11 +82,10 @@ const initialization = async () => {
       }
 
       // Create storage instances
-      const helloStorage = new HelloWorldStorage(mongoClient.db(`${NODE_ENV as string}_helloworld_lookupService`))
-      const uhrpStorage = new UHRPStorage(mongoClient.db(`${NODE_ENV as string}_uhrp_lookupService`))
-      const shipStorage = new SHIPStorage(mongoClient.db(`${NODE_ENV as string}_ship_lookupService`))
-      const slapStorage = new SLAPStorage(mongoClient.db(`${NODE_ENV as string}_slap_lookupService`))
-      const kvstoreStorage = new KVStoreStorage(mongoClient.db(`${NODE_ENV as string}_kvstore_lookupService`))
+      const helloStorage = new HelloWorldStorage(db)
+      const uhrpStorage = new UHRPStorage(db)
+      const shipStorage = new SHIPStorage(db)
+      const slapStorage = new SLAPStorage(db)
 
       ninjaAdvertiser = new NinjaAdvertiser(
         SERVER_PRIVATE_KEY as string,
