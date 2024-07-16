@@ -48,7 +48,7 @@ const HTTP_PORT = NODE_ENV !== 'development'
   : (PORT !== undefined ? PORT : (PORT !== undefined ? PORT : 8080))
 
 // Configure with custom URLs specific to your supported topics.
-const knownDeployedOSN = `https://${NODE_ENV === 'production' ? '' : 'staging-'}example-overlay.babbage.systems`
+const knownDeployedOSN = `https://${NODE_ENV === 'production' ? '' : 'staging-'}overlay-example.babbage.systems`
 const SLAP_TRACKERS = [knownDeployedOSN]
 const SHIP_TRACKERS = [knownDeployedOSN]
 const SYNC_CONFIGURATION: SyncConfiguration = {
