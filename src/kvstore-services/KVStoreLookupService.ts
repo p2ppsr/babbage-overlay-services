@@ -40,8 +40,8 @@ export class KVStoreLookupService implements LookupService {
       throw new Error('Insufficient fields in outputScript to be a valid KVStore entry.')
     }
 
-    const protectedKey = result.fields[2].toString('base64')
-    const value = result.fields[3].toString('utf8')
+    const protectedKey = result.fields[0].toString('base64')
+    const value = result.fields[1].toString('utf8')
 
     // Store the KVStore fields in the storage engine
     await this.storage.storeRecord(txid, outputIndex, protectedKey, value)
