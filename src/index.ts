@@ -1,5 +1,5 @@
 import dotenv from 'dotenv'
-import express from 'express'
+import express, { NextFunction, Request, Response } from 'express'
 import bodyparser from 'body-parser'
 import { Engine, KnexStorage, STEAK, TaggedBEEF } from '@bsv/overlay'
 import { WhatsOnChain, NodejsHttpClient, ARC, ArcConfig, MerklePath } from '@bsv/sdk'
@@ -26,6 +26,7 @@ import { KVStoreStorage } from './kvstore-services/KnexStorageEngine.js'
 import { KVStoreTopicManager } from './kvstore-services/KVStoreTopicManager.js'
 import { KVStoreLookupService } from './kvstore-services/KVStoreLookupService.js'
 import CombinatorialChainTracker from './CombinatorialChainTracker.js'
+import authrite from 'authrite-express'
 
 const knex = Knex(knexfile.development)
 const app = express()
@@ -154,6 +155,38 @@ app.use((req, res, next) => {
 
 // Serve a static documentation site, if you have one.
 app.use(express.static('public'))
+
+const conditionalAuthriteMiddleware = (req: Request, res: Response, next: NextFunction): void => {
+  if (req.path === '/submit' && req.method === 'POST') {
+    try {
+      const topics: string[] = JSON.parse(req.headers['x-topics'] as string)
+      if (topics.includes('tm_kvstore')) {
+        authrite.middleware({
+          serverPrivateKey: SERVER_PRIVATE_KEY,
+          baseUrl: HOSTING_DOMAIN
+        })(req, res, next)
+        return
+      }
+    } catch (error) {
+      res.status(400).json({
+        status: 'error',
+        message: 'Invalid topics format'
+      })
+      return
+    }
+  } else if (req.path === '/lookup' && req.method === 'POST') {
+    if (req.body.service === 'ls_kvstore') {
+      authrite.middleware({
+        serverPrivateKey: SERVER_PRIVATE_KEY,
+        baseUrl: HOSTING_DOMAIN
+      })(req, res, next)
+      return
+    }
+  }
+  next()
+}
+
+app.use(conditionalAuthriteMiddleware)
 
 // List hosted topic managers and lookup services
 app.get('/listTopicManagers', (req, res) => {
