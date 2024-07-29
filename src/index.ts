@@ -1,5 +1,5 @@
 import dotenv from 'dotenv'
-import express, { NextFunction, Request, Response } from 'express'
+import express from 'express'
 import bodyparser from 'body-parser'
 import { Engine, KnexStorage, STEAK, TaggedBEEF } from '@bsv/overlay'
 import { WhatsOnChain, NodejsHttpClient, ARC, ArcConfig, MerklePath } from '@bsv/sdk'
