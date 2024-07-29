@@ -36,7 +36,7 @@ export class KVStoreLookupService implements LookupService {
       fieldFormat: 'buffer'
     })
 
-    if (result.fields.length < 5) {
+    if (result.fields.length !== 2) {
       throw new Error('Insufficient fields in outputScript to be a valid KVStore entry.')
     }
 
