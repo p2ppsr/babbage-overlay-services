@@ -356,12 +356,12 @@ app.post('/requestForeignGASPNode', (req, res) => {
 })
 
 // Authrite is enforced from here forward
-app.use(authrite.middleware({
-  serverPrivateKey: SERVER_PRIVATE_KEY,
-  baseUrl: HOSTING_DOMAIN
-  // This allows you to request certificates from clients
-  // requestedCertificates: {}
-}))
+// app.use(authrite.middleware({
+//   serverPrivateKey: SERVER_PRIVATE_KEY,
+//   baseUrl: HOSTING_DOMAIN
+//   // This allows you to request certificates from clients
+//   // requestedCertificates: {}
+// }))
 
 // Submit transactions and facilitate lookup requests
 app.post('/submit', (req, res) => {
