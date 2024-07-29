@@ -25,6 +25,7 @@ import { SyncConfiguration } from '@bsv/overlay/SyncConfiguration.ts'
 import { KVStoreStorage } from './kvstore-services/KnexStorageEngine.js'
 import { KVStoreTopicManager } from './kvstore-services/KVStoreTopicManager.js'
 import { KVStoreLookupService } from './kvstore-services/KVStoreLookupService.js'
+import CombinatorialChainTracker from './CombinatorialChainTracker.js'
 
 const knex = Knex(knexfile.development)
 const app = express()
@@ -52,7 +53,8 @@ const knownDeployedOSN = `https://${NODE_ENV === 'production' ? '' : 'staging-'}
 const SLAP_TRACKERS = [knownDeployedOSN]
 const SHIP_TRACKERS = [knownDeployedOSN]
 const SYNC_CONFIGURATION: SyncConfiguration = {
-  tm_helloworld: [knownDeployedOSN]
+  tm_helloworld: [knownDeployedOSN],
+  tm_uhrp: false
 }
 
 // Initialization the overlay engine
@@ -110,11 +112,13 @@ const initialization = async () => {
           ls_kvstore: new KVStoreLookupService(kvstoreStorage)
         },
         new KnexStorage(knex),
-        new WhatsOnChain(
-          NODE_ENV === 'production' ? 'main' : 'test',
-          {
-            httpClient: new NodejsHttpClient(https)
-          }),
+        new CombinatorialChainTracker([
+          new WhatsOnChain(
+            NODE_ENV === 'production' ? 'main' : 'test',
+            {
+              httpClient: new NodejsHttpClient(https)
+            })
+        ]),
         HOSTING_DOMAIN as string,
         SHIP_TRACKERS,
         SLAP_TRACKERS,
