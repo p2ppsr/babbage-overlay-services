@@ -26,7 +26,8 @@ import { KVStoreStorage } from './kvstore-services/KnexStorageEngine.js'
 import { KVStoreTopicManager } from './kvstore-services/KVStoreTopicManager.js'
 import { KVStoreLookupService } from './kvstore-services/KVStoreLookupService.js'
 import CombinatorialChainTracker from './CombinatorialChainTracker.js'
-import authrite from 'authrite-express'
+import { UMPTopicManager, UMPLookupService, KnexStorageEngine } from 'ump-services'
+// import authrite from 'authrite-express'
 
 const knex = Knex(knexfile.development)
 const app = express()
@@ -103,14 +104,16 @@ const initialization = async () => {
           tm_uhrp: new UHRPTopicManager(),
           tm_ship: new SHIPTopicManager(),
           tm_slap: new SLAPTopicManager(),
-          tm_kvstore: new KVStoreTopicManager()
+          tm_kvstore: new KVStoreTopicManager(),
+          tm_ump: new UMPTopicManager()
         },
         {
           ls_helloworld: new HelloWorldLookupService(helloStorage),
           ls_uhrp: new UHRPLookupService(uhrpStorage),
           ls_ship: new SHIPLookupService(shipStorage),
           ls_slap: new SLAPLookupService(slapStorage),
-          ls_kvstore: new KVStoreLookupService(kvstoreStorage)
+          ls_kvstore: new KVStoreLookupService(kvstoreStorage),
+          ls_ump: new UMPLookupService(new KnexStorageEngine({ knex }))
         },
         new KnexStorage(knex),
         new CombinatorialChainTracker([
