@@ -1,16 +1,17 @@
 import { KnexStorageEngine } from 'ump-services'
-import Knex from 'knex'
+import mysqlKnex from 'knex'
+import type { Knex } from 'knex'
 import knexfile from '../../knexfile.js'
 
-const knex = Knex(knexfile.development)
+const knex = mysqlKnex(knexfile.development)
 const engine = new KnexStorageEngine({
   knex
 })
 
-exports.up = async (knex: Knex.Knex) => {
+export async function up(knex: Knex): Promise<void> {
   await engine.migrations[0].up(knex)
 }
 
-exports.down = async (knex: Knex.Knex) => {
+export async function down(knex: Knex): Promise<void> {
   await engine.migrations[0].down(knex)
 }
