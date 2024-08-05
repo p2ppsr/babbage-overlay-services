@@ -26,6 +26,8 @@ import { KVStoreStorage } from './kvstore-services/KnexStorageEngine.js'
 import { KVStoreTopicManager } from './kvstore-services/KVStoreTopicManager.js'
 import { KVStoreLookupService } from './kvstore-services/KVStoreLookupService.js'
 import CombinatorialChainTracker from './CombinatorialChainTracker.js'
+import { UMPTopicManager, UMPLookupService, KnexStorageEngine } from 'ump-services'
+// import authrite from 'authrite-express'
 
 const knex = Knex(knexfile.development)
 const app = express()
@@ -102,14 +104,16 @@ const initialization = async () => {
           tm_uhrp: new UHRPTopicManager(),
           tm_ship: new SHIPTopicManager(),
           tm_slap: new SLAPTopicManager(),
-          tm_kvstore: new KVStoreTopicManager()
+          tm_kvstore: new KVStoreTopicManager(),
+          tm_ump: new UMPTopicManager()
         },
         {
           ls_helloworld: new HelloWorldLookupService(helloStorage),
           ls_uhrp: new UHRPLookupService(uhrpStorage),
           ls_ship: new SHIPLookupService(shipStorage),
           ls_slap: new SLAPLookupService(slapStorage),
-          ls_kvstore: new KVStoreLookupService(kvstoreStorage)
+          ls_kvstore: new KVStoreLookupService(kvstoreStorage),
+          ls_ump: new UMPLookupService(new KnexStorageEngine({ knex }))
         },
         new KnexStorage(knex),
         new CombinatorialChainTracker([
@@ -154,6 +158,38 @@ app.use((req, res, next) => {
 
 // Serve a static documentation site, if you have one.
 app.use(express.static('public'))
+
+// const conditionalAuthriteMiddleware = (req: Request, res: Response, next: NextFunction): void => {
+//   if (req.path === '/submit' && req.method === 'POST') {
+//     try {
+//       const topics: string[] = JSON.parse(req.headers['x-topics'] as string)
+//       if (topics.includes('tm_kvstore')) {
+//         authrite.middleware({
+//           serverPrivateKey: SERVER_PRIVATE_KEY,
+//           baseUrl: HOSTING_DOMAIN
+//         })(req, res, next)
+//         return
+//       }
+//     } catch (error) {
+//       res.status(400).json({
+//         status: 'error',
+//         message: 'Invalid topics format'
+//       })
+//       return
+//     }
+//   } else if (req.path === '/lookup' && req.method === 'POST') {
+//     if (req.body.service === 'ls_kvstore') {
+//       authrite.middleware({
+//         serverPrivateKey: SERVER_PRIVATE_KEY,
+//         baseUrl: HOSTING_DOMAIN
+//       })(req, res, next)
+//       return
+//     }
+//   }
+//   next()
+// }
+
+// app.use(conditionalAuthriteMiddleware)
 
 // List hosted topic managers and lookup services
 app.get('/listTopicManagers', (req, res) => {
@@ -222,57 +258,6 @@ app.get('/getDocumentationForLookupServiceProvider', (req, res) => {
       const result = await engine.getDocumentationForLookupServiceProvider(req.query.lookupServices)
       return res.status(200).json(result)
     } catch (error) {
-      return res.status(400).json({
-        status: 'error',
-        message: error instanceof Error ? error.message : 'An unknown error occurred'
-      })
-    }
-  })().catch(() => {
-    res.status(500).json({
-      status: 'error',
-      message: 'Unexpected error'
-    })
-  })
-})
-
-// Submit transactions and facilitate lookup requests
-app.post('/submit', (req, res) => {
-  (async () => {
-    try {
-      // Parse out the topics and construct the tagged BEEF
-      const topics = JSON.parse(req.headers['x-topics'] as string)
-      const taggedBEEF: TaggedBEEF = {
-        beef: Array.from(req.body as number[]),
-        topics
-      }
-
-      // Using a callback function, we can just return once our steak is ready
-      // instead of having to wait for all the broadcasts to occur.
-      await engine.submit(taggedBEEF, (steak: STEAK) => {
-        return res.status(200).json(steak)
-      })
-    } catch (error) {
-      console.error(error)
-      return res.status(400).json({
-        status: 'error',
-        message: error instanceof Error ? error.message : 'An unknown error occurred'
-      })
-    }
-  })().catch(() => {
-    res.status(500).json({
-      status: 'error',
-      message: 'Unexpected error'
-    })
-  })
-})
-
-app.post('/lookup', (req, res) => {
-  (async () => {
-    try {
-      const result = await engine.lookup(req.body)
-      return res.status(200).json(result)
-    } catch (error) {
-      console.error(error)
       return res.status(400).json({
         status: 'error',
         message: error instanceof Error ? error.message : 'An unknown error occurred'
@@ -373,27 +358,58 @@ app.post('/requestForeignGASPNode', (req, res) => {
   })
 })
 
-app.post('/migrate', (req, res) => {
+// Authrite is enforced from here forward
+// app.use(authrite.middleware({
+//   serverPrivateKey: SERVER_PRIVATE_KEY,
+//   baseUrl: HOSTING_DOMAIN
+//   // This allows you to request certificates from clients
+//   // requestedCertificates: {}
+// }))
+
+// Submit transactions and facilitate lookup requests
+app.post('/submit', (req, res) => {
   (async () => {
-    if (
-      typeof MIGRATE_KEY === 'string' &&
-      MIGRATE_KEY.length > 10 &&
-      req.body.migratekey === MIGRATE_KEY
-    ) {
-      const result = await knex.migrate.latest()
-      res.status(200).json({
-        status: 'success',
-        result
+    try {
+      // Parse out the topics and construct the tagged BEEF
+      const topics = JSON.parse(req.headers['x-topics'] as string)
+      const taggedBEEF: TaggedBEEF = {
+        beef: Array.from(req.body as number[]),
+        topics
+      }
+
+      // Using a callback function, we can just return once our steak is ready
+      // instead of having to wait for all the broadcasts to occur.
+      await engine.submit(taggedBEEF, (steak: STEAK) => {
+        return res.status(200).json(steak)
       })
-    } else {
-      res.status(401).json({
+    } catch (error) {
+      console.error(error)
+      return res.status(400).json({
         status: 'error',
-        code: 'ERR_UNAUTHORIZED',
-        description: 'Access with this key was denied.'
+        message: error instanceof Error ? error.message : 'An unknown error occurred'
       })
     }
-  })().catch((error) => {
-    console.error(error)
+  })().catch(() => {
+    res.status(500).json({
+      status: 'error',
+      message: 'Unexpected error'
+    })
+  })
+})
+
+app.post('/lookup', (req, res) => {
+  (async () => {
+    try {
+      const result = await engine.lookup(req.body)
+      return res.status(200).json(result)
+    } catch (error) {
+      console.error(error)
+      return res.status(400).json({
+        status: 'error',
+        message: error instanceof Error ? error.message : 'An unknown error occurred'
+      })
+    }
+  })().catch(() => {
     res.status(500).json({
       status: 'error',
       message: 'Unexpected error'
