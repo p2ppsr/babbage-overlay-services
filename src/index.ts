@@ -28,10 +28,10 @@ import { KVStoreLookupService } from './kvstore-services/KVStoreLookupService.js
 import CombinatorialChainTracker from './CombinatorialChainTracker.js'
 import { UMPTopicManager, UMPLookupService, KnexStorageEngine } from 'ump-services'
 import { TSPTopicManager, TSPLookupService, TSPStorageEngine } from 'tsp-services'
-import { ProtoMapTopicManager, ProtoMapLookupService, ProtoMapStorageEngine } from '@cwi/protomap-services'
-import { CertMapTopicManager, CertMapLookupService, CertMapStorageEngine } from '@cwi/certmap-services'
-import { BasketMapLookupService, BasketMapStorageEngine, BasketMapTopicManager } from '@cwi/basketmap-services'
-import { SigniaLookupService, SigniaStorageEngine, SigniaTopicManager } from '@cwi/signia-services'
+import { ProtoMapTopicManager, ProtoMapLookupService, ProtoMapStorageEngine } from 'protomap-services'
+import { CertMapTopicManager, CertMapLookupService, CertMapStorageEngine } from 'certmap-services'
+import { BasketMapLookupService, BasketMapStorageEngine, BasketMapTopicManager } from 'basketmap-services'
+import { SigniaLookupService, SigniaStorageEngine, SigniaTopicManager } from 'signia-services'
 // import authrite from 'authrite-express'
 
 const knex = Knex(knexfile.development)
