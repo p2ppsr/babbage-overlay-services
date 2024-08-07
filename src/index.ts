@@ -27,6 +27,11 @@ import { KVStoreTopicManager } from './kvstore-services/KVStoreTopicManager.js'
 import { KVStoreLookupService } from './kvstore-services/KVStoreLookupService.js'
 import CombinatorialChainTracker from './CombinatorialChainTracker.js'
 import { UMPTopicManager, UMPLookupService, KnexStorageEngine } from 'ump-services'
+import { TSPTopicManager, TSPLookupService, TSPStorageEngine } from 'tsp-services'
+import { ProtoMapTopicManager, ProtoMapLookupService, ProtoMapStorageEngine } from '@cwi/protomap-services'
+import { CertMapTopicManager, CertMapLookupService, CertMapStorageEngine } from '@cwi/certmap-services'
+import { BasketMapLookupService, BasketMapStorageEngine, BasketMapTopicManager } from '@cwi/basketmap-services'
+import { SigniaLookupService, SigniaStorageEngine, SigniaTopicManager } from '@cwi/signia-services'
 // import authrite from 'authrite-express'
 
 const knex = Knex(knexfile.development)
@@ -91,6 +96,11 @@ const initialization = async () => {
       const shipStorage = new SHIPStorage(db)
       const slapStorage = new SLAPStorage(db)
       const kvstoreStorage = new KVStoreStorage(db)
+      const tspStorage = new TSPStorageEngine(db)
+      const protomapStorage = new ProtoMapStorageEngine(db)
+      const certmapStorage = new CertMapStorageEngine(db)
+      const basketmapStorage = new BasketMapStorageEngine(db)
+      const signiaStorage = new SigniaStorageEngine(db)
 
       ninjaAdvertiser = new NinjaAdvertiser(
         SERVER_PRIVATE_KEY as string,
@@ -105,7 +115,12 @@ const initialization = async () => {
           tm_ship: new SHIPTopicManager(),
           tm_slap: new SLAPTopicManager(),
           tm_kvstore: new KVStoreTopicManager(),
-          tm_ump: new UMPTopicManager()
+          tm_ump: new UMPTopicManager(),
+          tm_tsp: new TSPTopicManager(),
+          tm_protomap: new ProtoMapTopicManager(),
+          tm_certmap: new CertMapTopicManager(),
+          tm_basketmap: new BasketMapTopicManager(),
+          tm_signia: new SigniaTopicManager()
         },
         {
           ls_helloworld: new HelloWorldLookupService(helloStorage),
@@ -113,7 +128,12 @@ const initialization = async () => {
           ls_ship: new SHIPLookupService(shipStorage),
           ls_slap: new SLAPLookupService(slapStorage),
           ls_kvstore: new KVStoreLookupService(kvstoreStorage),
-          ls_ump: new UMPLookupService(new KnexStorageEngine({ knex }))
+          ls_ump: new UMPLookupService(new KnexStorageEngine({ knex })),
+          ls_tsp: new TSPLookupService(tspStorage),
+          ls_protomap: new ProtoMapLookupService(protomapStorage),
+          ls_certmap: new CertMapLookupService(certmapStorage),
+          ls_basketmap: new BasketMapLookupService(basketmapStorage),
+          ls_signia: new SigniaLookupService(signiaStorage)
         },
         new KnexStorage(knex),
         new CombinatorialChainTracker([
