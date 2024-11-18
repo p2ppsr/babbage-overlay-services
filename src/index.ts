@@ -110,6 +110,7 @@ const initialization = async () => {
 
       engine = new Engine(
         {
+          tm_helloOverlay: new HelloWorldTopicManager(),
           tm_helloworld: new HelloWorldTopicManager(),
           tm_uhrp: new UHRPTopicManager(),
           tm_ship: new SHIPTopicManager(),
@@ -123,6 +124,7 @@ const initialization = async () => {
           tm_signia: new SigniaTopicManager()
         },
         {
+          ls_helloOverlay: new HelloWorldLookupService(helloStorage),
           ls_helloworld: new HelloWorldLookupService(helloStorage),
           ls_uhrp: new UHRPLookupService(uhrpStorage),
           ls_ship: new SHIPLookupService(shipStorage),
