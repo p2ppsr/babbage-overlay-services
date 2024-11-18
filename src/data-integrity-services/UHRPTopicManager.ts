@@ -120,6 +120,7 @@ export class UHRPTopicManager implements TopicManager {
           outputsToAdmit.push(i)
         } catch (error) {
           // Continue processing other outputs which may be valid
+          console.log('ERROR:', error)
         }
       }
       if (outputsToAdmit.length === 0) {
