@@ -18,7 +18,7 @@
   "license": "Open BSV License",
   "dependencies": {
     "@babbage/sdk-ts": "^0.2.45",
-    "@bsv/overlay": "^0.1.10",
+    "@bsv/overlay": "^0.1.15",
     "@bsv/sdk": "^1.1.13",
     "authrite-express": "^0.4.32",
     "basketmap-services": "^0.1.0",
