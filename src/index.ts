@@ -7,9 +7,6 @@ import { MongoClient } from 'mongodb'
 import https from 'https'
 import Knex from 'knex'
 import knexfile from '../knexfile.js'
-import { HelloWorldTopicManager } from './helloworld-services/HelloWorldTopicManager.js'
-import { HelloWorldLookupService } from './helloworld-services/HelloWorldLookupService.js'
-import { HelloWorldStorage } from './helloworld-services/HelloWorldStorage.js'
 import { SHIPLookupService } from './peer-discovery-services/SHIP/SHIPLookupService.js'
 import { SLAPLookupService } from './peer-discovery-services/SLAP/SLAPLookupService.js'
 import { SHIPStorage } from './peer-discovery-services/SHIP/SHIPStorage.js'
@@ -32,6 +29,7 @@ import { ProtoMapTopicManager, ProtoMapLookupService, ProtoMapStorageEngine } fr
 import { CertMapTopicManager, CertMapLookupService, CertMapStorageEngine } from 'certmap-services'
 import { BasketMapLookupService, BasketMapStorageEngine, BasketMapTopicManager } from 'basketmap-services'
 import { SigniaLookupService, SigniaStorageEngine, SigniaTopicManager } from 'signia-services'
+import { HelloWorldLookupServiceFactory, HelloWorldTopicManager } from 'hello-overlay-backend'
 // import authrite from 'authrite-express'
 
 const knex = Knex(knexfile.development)
@@ -91,16 +89,17 @@ const initialization = async () => {
       }
 
       // Create storage instances
-      const helloStorage = new HelloWorldStorage(db)
       const uhrpStorage = new UHRPStorage(db)
       const shipStorage = new SHIPStorage(db)
       const slapStorage = new SLAPStorage(db)
       const kvstoreStorage = new KVStoreStorage(db)
-      const tspStorage = new TSPStorageEngine(db)
-      const protomapStorage = new ProtoMapStorageEngine(db)
-      const certmapStorage = new CertMapStorageEngine(db)
-      const basketmapStorage = new BasketMapStorageEngine(db)
-      const signiaStorage = new SigniaStorageEngine(db)
+
+      // TODO: update mongodb deps
+      const tspStorage = new TSPStorageEngine(db as any)
+      const protomapStorage = new ProtoMapStorageEngine(db as any)
+      const certmapStorage = new CertMapStorageEngine(db as any)
+      const basketmapStorage = new BasketMapStorageEngine(db as any)
+      const signiaStorage = new SigniaStorageEngine(db as any)
 
       ninjaAdvertiser = new NinjaAdvertiser(
         SERVER_PRIVATE_KEY as string,
@@ -123,7 +122,7 @@ const initialization = async () => {
           tm_signia: new SigniaTopicManager()
         },
         {
-          ls_helloworld: new HelloWorldLookupService(helloStorage),
+          ls_helloworld: HelloWorldLookupServiceFactory(db),
           ls_uhrp: new UHRPLookupService(uhrpStorage),
           ls_ship: new SHIPLookupService(shipStorage),
           ls_slap: new SLAPLookupService(slapStorage),
