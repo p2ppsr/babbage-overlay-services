@@ -1,4 +1,4 @@
-import { TaggedBEEF } from '@bsv/overlay/TaggedBEEF.ts'
+import { TaggedBEEF } from '@bsv/overlay'
 import pushdrop from 'pushdrop'
 import { Ninja, NinjaTxInputsApi } from 'ninja-base'
 import { EnvelopeEvidenceApi, toBEEFfromEnvelope } from '@babbage/sdk-ts'

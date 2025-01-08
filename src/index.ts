@@ -22,7 +22,7 @@ import { SyncConfiguration } from '@bsv/overlay/SyncConfiguration.ts'
 import { KVStoreStorage } from './kvstore-services/KnexStorageEngine.js'
 import { KVStoreTopicManager } from './kvstore-services/KVStoreTopicManager.js'
 import { KVStoreLookupService } from './kvstore-services/KVStoreLookupService.js'
-import CombinatorialChainTracker from './CombinatorialChainTracker.js'
+// import CombinatorialChainTracker from './CombinatorialChainTracker.js'
 import { UMPTopicManager, UMPLookupService, KnexStorageEngine } from 'ump-services'
 import { TSPTopicManager, TSPLookupService, TSPStorageEngine } from 'tsp-services'
 import { ProtoMapTopicManager, ProtoMapLookupService, ProtoMapStorageEngine } from 'protomap-services'
@@ -135,13 +135,13 @@ const initialization = async () => {
           ls_signia: new SigniaLookupService(signiaStorage)
         },
         new KnexStorage(knex),
-        new CombinatorialChainTracker([
-          new WhatsOnChain(
-            NODE_ENV === 'production' ? 'main' : 'test',
-            {
-              httpClient: new NodejsHttpClient(https)
-            })
-        ]),
+        // new CombinatorialChainTracker([
+        new WhatsOnChain(
+          NODE_ENV === 'production' ? 'main' : 'test',
+          {
+            httpClient: new NodejsHttpClient(https)
+          }),
+        // ]),
         HOSTING_DOMAIN as string,
         SHIP_TRACKERS,
         SLAP_TRACKERS,
